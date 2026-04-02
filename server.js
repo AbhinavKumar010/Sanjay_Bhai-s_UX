@@ -20,7 +20,7 @@ app.use(express.json());
 connectDB();
 
 // ROUTES
-app.use("/api/auth", require("./backend/routes/authRoutes"));
+app.use("/api/auth", require("./routes/authRoutes"));
 
 // SOCKET.IO
 const io = new Server(server, {
