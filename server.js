@@ -17,7 +17,7 @@ app.use(express.json());
 app.use(cors({
   origin: [
     "http://localhost:5173",            // Vite dev
-    "https://sk-sanjay-chat.vercel.app/"  // deployed frontend
+    "https://sk-sanjay-chat.vercel.app"  // deployed frontend
   ],
   credentials: true
 }));
@@ -33,7 +33,7 @@ const io = new Server(server, {
   cors: {
     origin: [
       "http://localhost:5173",
-      "https://sk-sanjay-chat.vercel.app/"
+      "https://sk-sanjay-chat.vercel.app"
     ],
     methods: ["GET", "POST"],
     credentials: true
