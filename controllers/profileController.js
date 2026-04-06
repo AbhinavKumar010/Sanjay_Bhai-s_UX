@@ -1,22 +1,32 @@
 import Profile from "../models/Profile.js";
-import { v4 as uuidv4 } from "uuid";
 
-// Create profile (no auth yet, unique per user)
-export const createProfile = async (req, res) => {
+// Create or update profile
+export const createOrUpdateProfile = async (req, res) => {
   try {
     console.log("BODY:", req.body);
 
-    const userId = req.user?.id || uuidv4(); // unique id if no auth
+    // Fixed userId for now (replace with auth later)
+    const userId = req.user?.id || req.body.userId;
+
+    if (!userId) {
+      return res.status(400).json({ error: "userId is required" });
+    }
 
     const profileData = {
       ...req.body,
       userId,
     };
 
-    const profile = await Profile.create(profileData); // always create new
+    // Upsert: create new if not exists
+    const profile = await Profile.findOneAndUpdate(
+      { userId },
+      profileData,
+      { returnDocument: "after", upsert: true }
+    );
+
     res.json(profile);
   } catch (err) {
-    console.log("ERROR:", err.message);
+    console.error("ERROR:", err.message);
     res.status(500).json({ error: err.message });
   }
 };
@@ -27,7 +37,37 @@ export const getAllProfiles = async (req, res) => {
     const profiles = await Profile.find();
     res.json(profiles);
   } catch (err) {
-    console.log(err.message);
+    console.error(err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Get profile by ID
+export const getProfileById = async (req, res) => {
+  try {
+    const profile = await Profile.findById(req.params.id);
+    if (!profile) return res.status(404).json({ error: "Profile not found" });
+    res.json(profile);
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).json({ error: err.message });
+  }
+};
+
+// Optional: toggle availability or consent flags
+export const updateAvailability = async (req, res) => {
+  try {
+    const { userId, isAvailable, canChat, canAudioCall, canVideoCall } = req.body;
+
+    const profile = await Profile.findOneAndUpdate(
+      { userId },
+      { isAvailable, canChat, canAudioCall, canVideoCall },
+      { returnDocument: "after" }
+    );
+
+    res.json(profile);
+  } catch (err) {
+    console.error(err.message);
     res.status(500).json({ error: err.message });
   }
 };
