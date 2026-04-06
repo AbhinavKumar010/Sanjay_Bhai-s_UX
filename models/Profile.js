@@ -14,6 +14,7 @@ const profileSchema = new mongoose.Schema({
   profilePic: String,
 
   // ✅ Consent fields
+  isAvailable: { type: Boolean, default: true },
   canChat: { type: Boolean, default: true },
   canAudioCall: { type: Boolean, default: true },
   canVideoCall: { type: Boolean, default: true },
