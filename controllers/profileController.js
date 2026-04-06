@@ -42,12 +42,7 @@ export const getMyProfile = async (req, res) => {
 // Get all profiles
 export const getAllProfiles = async (req, res) => {
   try {
-    const userId = req.user?.id || "user123";
-
-    const profiles = await Profile.find({
-      userId: { $ne: userId },
-    });
-
+    const profiles = await Profile.find(); // get all
     res.json(profiles);
   } catch (err) {
     console.log(err.message);
