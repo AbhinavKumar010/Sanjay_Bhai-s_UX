@@ -3,6 +3,8 @@ import http from "http";
 import cors from "cors";
 import dotenv from "dotenv";
 import { Server } from "socket.io";
+import path from "path";
+import { fileURLToPath } from "url";
 
 import connectDB from "./config/db.js";
 import socketHandler from "./sockets/socket.js";
@@ -19,6 +21,7 @@ const server = http.createServer(app);
 // ================= MIDDLEWARE =================
 app.use(express.json());
 
+// CORS
 app.use(cors({
   origin: [
     "http://localhost:5173",
@@ -26,6 +29,12 @@ app.use(cors({
   ],
   credentials: true
 }));
+
+// ================= SERVE UPLOADS =================
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+app.use("/uploads", express.static(path.join(__dirname, "uploads"))); 
+// Now /uploads/filename.jpg is accessible publicly
 
 // ================= DATABASE =================
 connectDB();

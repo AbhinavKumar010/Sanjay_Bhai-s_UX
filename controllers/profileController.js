@@ -1,23 +1,34 @@
 import Profile from "../models/Profile.js";
 
-// Create or update profile
+// -------------------- CREATE OR UPDATE PROFILE --------------------
 export const createOrUpdateProfile = async (req, res) => {
   try {
     console.log("BODY:", req.body);
+    console.log("FILE:", req.file);
 
-    // Fixed userId for now (replace with auth later)
+    // Replace with proper auth later
     const userId = req.user?.id || req.body.userId;
+    if (!userId) return res.status(400).json({ error: "userId is required" });
 
-    if (!userId) {
-      return res.status(400).json({ error: "userId is required" });
-    }
-
+    // Build profile data
     const profileData = {
       ...req.body,
       userId,
     };
 
-    // Upsert: create new if not exists
+    // Handle uploaded file
+    if (req.file) {
+      profileData.profilePic = `/uploads/${req.file.filename}`;
+    }
+
+    // Convert interests string to array if needed
+    if (profileData.interests && typeof profileData.interests === "string") {
+      profileData.interests = profileData.interests
+        .split(",")
+        .map((i) => i.trim());
+    }
+
+    // Upsert profile
     const profile = await Profile.findOneAndUpdate(
       { userId },
       profileData,
@@ -31,7 +42,7 @@ export const createOrUpdateProfile = async (req, res) => {
   }
 };
 
-// Get all profiles
+// -------------------- GET ALL PROFILES --------------------
 export const getAllProfiles = async (req, res) => {
   try {
     const profiles = await Profile.find();
@@ -42,7 +53,7 @@ export const getAllProfiles = async (req, res) => {
   }
 };
 
-// Get profile by ID
+// -------------------- GET PROFILE BY ID --------------------
 export const getProfileById = async (req, res) => {
   try {
     const profile = await Profile.findById(req.params.id);
@@ -54,7 +65,7 @@ export const getProfileById = async (req, res) => {
   }
 };
 
-// Optional: toggle availability or consent flags
+// -------------------- UPDATE AVAILABILITY / CONSENT --------------------
 export const updateAvailability = async (req, res) => {
   try {
     const { userId, isAvailable, canChat, canAudioCall, canVideoCall } = req.body;
